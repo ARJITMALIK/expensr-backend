@@ -1,0 +1,17 @@
+export const QueryEntity = {
+    affectedRows: 0,
+    changedRows: 0,
+    fieldCount: 0,
+    insertId: 0,
+    message: "",
+    protocol41: true,
+    serverStatus: 0,
+    warningCount: 0,
+    status: 1,
+    fetchedRows: 0,
+    rows: {},
+    info: "",
+    startDT: new Date(),
+    endDT: new Date(),
+    tat: 0,
+};

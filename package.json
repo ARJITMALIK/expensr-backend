@@ -1,0 +1,35 @@
+{
+  "name": "nodemysqltemplate",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/server.main.js",
+  "scripts": {
+    "postinstall": "npx tsc",
+    "start": "tsc && node dist/server.main.js",
+    "build": "npm run lint && rimraf dist/ && tsc",
+    "lint": "eslint . --ext .ts",
+    "dev": "tsc-watch --onSuccess \"node ./dist/server.main.js\""
+  },
+  "author": "Arjit Malik",
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.10.1",
+    "tsc-watch": "^6.2.0",
+    "winston": "^3.13.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.14.9",
+    "eslint": "^9.6.0",
+    "nodemon": "^3.1.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.3"
+  }
+}
