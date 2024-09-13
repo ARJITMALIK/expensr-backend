@@ -46,6 +46,7 @@ export default class MasterModel {
         } catch (error) {
             resModel.status = -33;
             resModel.info = "catch : " + resModel.info + " : " + error;
+            console.log(error);
             this.logger.error(JSON.stringify(resModel), 'createUpdateEntity : model');
         } finally {
             try {

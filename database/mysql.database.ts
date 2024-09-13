@@ -3,62 +3,70 @@ import Logger from "../utils/logger.util";
 import * as mysql from 'mysql2'
 import { Constants } from "../utils/constants.util";
 import { QueryEntity } from "../entities/core/query.entity";
-import Methods from "../utils/method.util";
 
+type MySQLResponseType = {
+  affectedRows: number;
+  changedRows: number;
+  fieldCount: number;
+  insertId: number;
+  message: string;
+  protocol41: boolean;
+  serverStatus: number;
+  warningCount: number;
+  status: number;
+  fetchedRows: number;
+  rows: any[];
+  info: "";
+  startDT: Date;
+  endDT: Date;
+  tat: number;
+}
+
+const logger: Logger = new Logger();
+const isObject = (value: any): boolean => {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+};
 dotenv.config();
 
+let db_host_ip: string = process.env.SQL_DB_HOST_IP + "";
+let db_port: number = Number(process.env.SQL_DB_PORT + "");
+let db_name: string = process.env.SQL_DB_NAME + "";
+let db_user: string = process.env.SQL_DB_USER + "";
+let db_password: string = process.env.SQL_DB_PASSWORD + "";
+// let db_conn_count: number = Number(process.env.MYSQL_DB_CONN_COUNT + "");
 
+// connect to the db
+const dbConnectionInfo = {
+  host: db_host_ip,
+  port: db_port,
+  database: db_name,
+  user: db_user,
+  password: db_password,
+  dateStrings: true,
+  // multipleStatements: true,
+  connectionLimit: 1000, //mysql connection pool length, ie DB Connections in pool
+};
+
+//create mysql connection pool
+logger.info(
+  "DB Connection Pool: Starting: DB Name :: " + JSON.stringify(dbConnectionInfo.database), 'DB CONN POOL'
+);
+export const connPool = mysql.createPool(dbConnectionInfo);
+logger.info("DB Connection Pool: Success", 'DB CONN POOL');
 
 export default class MySqlMaster {
   autoCommit = true;
-  private methods: Methods;
-  private logger: Logger;
-
-  private db_host_ip: string = process.env.SQL_DB_HOST_IP + "";
-  private db_port: number = Number(process.env.SQL_DB_PORT + "");
-  private db_name: string = process.env.SQL_DB_NAME + "";
-  private db_user: string = process.env.SQL_DB_USER + "";
-  private db_password: string = process.env.SQL_DB_PASSWORD + "";
-  // let db_conn_count: number = Number(process.env.MYSQL_DB_CONN_COUNT + "");
-
-  public connPool;
-
-  constructor() {
-    this.methods = new Methods();
-    this.logger = new Logger();
-  }
-
-  connect() {
-    const dbConnectionInfo = {
-      host: this.db_host_ip,
-      port: this.db_port,
-      database: this.db_name,
-      user: this.db_user,
-      password: this.db_password,
-      dateStrings: true,
-      // multipleStatements: true,
-      connectionLimit: 1000, //mysql connection pool length, ie DB Connections in pool
-    };
-
-
-    //create mysql connection pool
-    this.logger.info(
-      "DB Connection Pool: Starting: DB Name :: " + JSON.stringify(dbConnectionInfo.database), 'DB CONN POOL'
-    );
-    this.connPool = mysql.createPool(dbConnectionInfo);
-    this.logger.info("DB Connection Pool: Success", 'DB CONN POOL');
-  }
 
   //query result
-  executeQuery(query: string): Promise<typeof QueryEntity> {
+  executeQuery(query: string): Promise<MySQLResponseType> {
     let promise: any;
     let startMS = new Date().getTime();
-    let queryModel = { ...QueryEntity }
+    let queryModel = {...QueryEntity}
     try {
       promise = new Promise((resolve, reject) => {
-        this.connPool.query(
+        connPool.query(
           query,
-          async <T extends typeof QueryEntity>(
+          async <T extends MySQLResponseType>(
             err: any,
             results: T,
             fields: any
@@ -82,7 +90,7 @@ export default class MySqlMaster {
                   queryModel.info +
                   ": 1, fetchedRows: " +
                   queryModel.fetchedRows;
-              } else if (this.methods.isObject(results)) {
+              } else if (isObject(results)) {
                 queryModel.affectedRows = results.affectedRows;
                 queryModel.fieldCount = results.fieldCount;
                 queryModel.insertId = results.insertId;
@@ -118,10 +126,10 @@ export default class MySqlMaster {
   executeQueryArgs(sql: any, args: any) {
     let promise;
     let startMS = new Date().getTime();
-    let queryModel = { ...QueryEntity };
+    let queryModel = {...QueryEntity};
     try {
       promise = new Promise((resolve, reject) => {
-        this.connPool.query(sql, args, async (err, results: any, fields) => {
+        connPool.query(sql, args, async (err, results: any, fields) => {
           // in case of errror in executing the query rejecting the request
           if (err) {
             //throw new Error('Error in Query Execution: ' + err);
@@ -139,7 +147,7 @@ export default class MySqlMaster {
               queryModel.rows = results;
               queryModel.info =
                 queryModel.info + ": 1, fetchedRows: " + queryModel.fetchedRows;
-            } else if (this.methods.isObject(results)) {
+            } else if (isObject(results)) {
               queryModel.affectedRows = results.affectedRows;
               queryModel.fieldCount = results.fieldCount;
               queryModel.insertId = results.insertId;

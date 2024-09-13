@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { ExampleController } from "../controllers/example.controller";
+import { UsersController } from "../controllers/v1/users.controller";
 import { AuthMiddleware } from "../middlewares/auth.middleware";
 
 export class Routes {
@@ -16,9 +16,10 @@ export class Routes {
     const authMiddleware = new AuthMiddleware();
     
     // controllers
-    const exampleController = new ExampleController();
+    const usersController = new UsersController();
 
-    this.router.post(`/info/get-all-info`, authMiddleware.checkAuth, exampleController.getAllInfo);
-    this.router.post(`/info/create-update-info`, exampleController.createUpdateInfo);
+    // user routes
+    this.router.get(`/users`, usersController.getUserInfo);
+    this.router.post(`/users`, usersController.createUpdateUser);
   }
 }
